@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 
 // --- Types ---
@@ -17,6 +16,8 @@ interface GeneratorConfig {
   includeNumbers: boolean;
   includeSymbols: boolean;
 }
+
+type AppView = 'home' | 'privacy' | 'terms' | 'contact';
 
 // --- Utilities ---
 const calculateStrength = (password: string): PasswordStrength => {
@@ -97,7 +98,7 @@ const generatePassword = (config: GeneratorConfig): string => {
   return password;
 };
 
-// --- Components ---
+// --- Sub-Components ---
 
 const PasswordStrengthMeter = () => {
   const [password, setPassword] = useState('');
@@ -129,13 +130,13 @@ const PasswordStrengthMeter = () => {
           <div className="absolute right-2 top-1.5 flex gap-2">
             <button
               onClick={() => setIsVisible(!isVisible)}
-              className="p-1.5 text-slate-400 hover:text-white transition-colors"
+              className="p-1.5 text-slate-400 hover:text-white transition-colors text-sm font-medium"
             >
               {isVisible ? "Hide" : "Show"}
             </button>
             <button
               onClick={copyToClipboard}
-              className="p-1.5 text-slate-400 hover:text-white transition-colors"
+              className="p-1.5 text-slate-400 hover:text-white transition-colors text-sm font-medium"
             >
               Copy
             </button>
@@ -227,9 +228,10 @@ const PasswordGenerator = () => {
           <label key={opt.key} className="flex items-center gap-3 cursor-pointer group">
             <input
               type="checkbox"
-              checked={config[opt.key as keyof GeneratorConfig]}
+              // Fix: Explicitly cast the value from GeneratorConfig to boolean as some properties are numbers (length)
+              checked={config[opt.key as keyof GeneratorConfig] as boolean}
               onChange={(e) => setConfig({ ...config, [opt.key]: e.target.checked })}
-              className="w-5 h-5 rounded border-slate-700 bg-slate-900 text-blue-500"
+              className="w-5 h-5 rounded border-slate-700 bg-slate-900 text-blue-500 focus:ring-blue-500"
             />
             <span className="text-sm text-slate-300 group-hover:text-white transition-colors">{opt.label}</span>
           </label>
@@ -244,13 +246,13 @@ const PasswordGenerator = () => {
       </button>
 
       {generated && (
-        <div className="relative p-3 bg-slate-900 border border-slate-700 rounded-lg font-mono text-blue-400 break-all">
-          {generated}
+        <div className="relative p-3 bg-slate-900 border border-slate-700 rounded-lg font-mono text-blue-400 break-all flex justify-between items-center">
+          <span className="truncate mr-2">{generated}</span>
           <button 
             onClick={() => { navigator.clipboard.writeText(generated); alert('Copied!'); }}
-            className="ml-2 text-xs text-slate-500 hover:text-white"
+            className="flex-shrink-0 text-xs text-blue-500 hover:text-white border border-blue-500/30 px-2 py-1 rounded transition-colors"
           >
-            [Copy]
+            Copy
           </button>
         </div>
       )}
@@ -304,49 +306,148 @@ const FAQSection = () => {
   );
 };
 
-const Footer = () => (
-  <footer className="border-t border-slate-800 bg-slate-950 py-12 px-6">
-    <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-      <div className="flex items-center gap-2">
-        <span className="text-xl font-bold text-white tracking-tight">SecureCheck <span className="text-blue-500">AI</span></span>
+// --- View Components ---
+
+const PrivacyPolicyView = ({ onBack }: { onBack: () => void }) => (
+  <div className="max-w-4xl mx-auto py-20 px-6 text-slate-300">
+    <button onClick={onBack} className="mb-8 text-blue-500 hover:text-white flex items-center gap-2 transition-colors">
+      &larr; Back to Home
+    </button>
+    <h1 className="text-4xl font-bold text-white mb-8">Privacy Policy</h1>
+    <p className="mb-6">At SecureCheck AI, your security and privacy are our highest priorities. This Privacy Policy outlines how we handle data.</p>
+    
+    <h2 className="text-2xl font-bold text-white mb-4">1. Local Processing Only</h2>
+    <p className="mb-6">The most important aspect of SecureCheck AI is that <strong>all processing happens locally in your browser</strong>. Your passwords are never transmitted to our servers or stored in any database. We use client-side JavaScript to perform entropy analysis and generation.</p>
+
+    <h2 className="text-2xl font-bold text-white mb-4">2. Data Collection</h2>
+    <p className="mb-6">We do not collect personal information. We do not use tracking cookies or analytics that identify you personally. We are committed to a zero-knowledge architecture.</p>
+
+    <h2 className="text-2xl font-bold text-white mb-4">3. Security Standards</h2>
+    <p className="mb-6">We follow industry-standard security protocols for password generation using the Web Crypto API, ensuring that generated passwords are cryptographically secure.</p>
+    
+    <p className="mt-12 text-sm text-slate-500 italic">Last Updated: February 2026</p>
+  </div>
+);
+
+const TermsOfServiceView = ({ onBack }: { onBack: () => void }) => (
+  <div className="max-w-4xl mx-auto py-20 px-6 text-slate-300">
+    <button onClick={onBack} className="mb-8 text-blue-500 hover:text-white flex items-center gap-2 transition-colors">
+      &larr; Back to Home
+    </button>
+    <h1 className="text-4xl font-bold text-white mb-8">Terms of Service</h1>
+    <p className="mb-6">By using SecureCheck AI, you agree to the following terms and conditions.</p>
+
+    <h2 className="text-2xl font-bold text-white mb-4">1. Acceptance of Terms</h2>
+    <p className="mb-6">Use of this tool constitutes acceptance of these terms. SecureCheck AI is provided "as is" without warranty of any kind.</p>
+
+    <h2 className="text-2xl font-bold text-white mb-4">2. Purpose</h2>
+    <p className="mb-6">This tool is for educational and security enhancement purposes. While we strive for maximum accuracy in our strength analysis, no tool can guarantee 100% protection against all cyber threats.</p>
+
+    <h2 className="text-2xl font-bold text-white mb-4">3. Limitation of Liability</h2>
+    <p className="mb-6">SecureCheck AI and its developers shall not be liable for any damages resulting from the use or inability to use this tool, or for any unauthorized access to your accounts resulting from password choices.</p>
+
+    <p className="mt-12 text-sm text-slate-500 italic">Last Updated: February 2026</p>
+  </div>
+);
+
+const ContactView = ({ onBack }: { onBack: () => void }) => (
+  <div className="max-w-4xl mx-auto py-20 px-6 text-slate-300 text-center">
+    <button onClick={onBack} className="mx-auto mb-12 text-blue-500 hover:text-white flex items-center gap-2 transition-colors">
+      &larr; Back to Home
+    </button>
+    <h1 className="text-4xl font-bold text-white mb-8">Contact Us</h1>
+    <p className="text-lg mb-8 text-slate-400">Have questions, feedback, or security concerns? Get in touch with our team.</p>
+    
+    <div className="glass-card p-12 rounded-3xl inline-block max-w-lg w-full">
+      <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
       </div>
-      <nav className="flex gap-8 text-sm text-slate-500">
-        <a href="#" className="hover:text-blue-500 transition-colors">Privacy Policy</a>
-        <a href="#" className="hover:text-blue-500 transition-colors">Terms of Service</a>
-        <a href="#" className="hover:text-blue-500 transition-colors">Contact Us</a>
-      </nav>
-      <div className="text-sm text-slate-600">&copy; 2026 SecureCheck AI.</div>
+      <h2 className="text-2xl font-bold text-white mb-2">Our Email</h2>
+      <a 
+        href="mailto:megadigital000004@gmail.com" 
+        className="text-xl font-mono text-blue-400 hover:text-blue-300 transition-colors block mb-6 underline break-all"
+      >
+        megadigital000004@gmail.com
+      </a>
+      <button 
+        onClick={() => { navigator.clipboard.writeText('megadigital000004@gmail.com'); alert('Email copied!'); }}
+        className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-lg transition-all"
+      >
+        Copy Email Address
+      </button>
     </div>
-  </footer>
+  </div>
 );
 
 // --- Main App ---
 const App: React.FC = () => {
+  const [view, setView] = useState<AppView>('home');
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [view]);
+
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="relative py-20 px-6 overflow-hidden text-center">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-blue-600/10 blur-[120px] rounded-full -z-10"></div>
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">
-            Secure Password Strength <br /><span className="text-blue-500">Checker & Generator 2026</span>
-          </h1>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-12">
-            Professional-grade encryption analysis and high-entropy generation.
-          </p>
-        </div>
+      {/* Header / Hero Section (Only in home) */}
+      {view === 'home' && (
+        <header className="relative py-20 px-6 overflow-hidden text-center">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-blue-600/10 blur-[120px] rounded-full -z-10"></div>
+          <div className="max-w-6xl mx-auto">
+            <div className="inline-block px-4 py-1.5 mb-6 text-xs font-bold tracking-widest text-blue-400 uppercase bg-blue-400/10 border border-blue-400/20 rounded-full">
+              AI-Powered Security 2026
+            </div>
+            <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">
+              Secure Password Strength <br /><span className="text-blue-500">Checker & Generator 2026</span>
+            </h1>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-12">
+              Professional-grade encryption analysis and high-entropy generation.
+              Ensure your digital identity is protected with the ultimate security toolkit.
+            </p>
+          </div>
 
-        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8 items-start justify-center">
-          <PasswordStrengthMeter />
-          <PasswordGenerator />
-        </div>
-      </header>
+          <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8 items-start justify-center">
+            <PasswordStrengthMeter />
+            <PasswordGenerator />
+          </div>
+        </header>
+      )}
 
+      {/* Conditional Main View */}
       <main className="flex-grow">
-        <ContentSection />
-        <FAQSection />
+        {view === 'home' && (
+          <>
+            <ContentSection />
+            <FAQSection />
+          </>
+        )}
+        {view === 'privacy' && <PrivacyPolicyView onBack={() => setView('home')} />}
+        {view === 'terms' && <TermsOfServiceView onBack={() => setView('home')} />}
+        {view === 'contact' && <ContactView onBack={() => setView('home')} />}
       </main>
 
-      <Footer />
+      {/* Footer Navigation */}
+      <footer className="border-t border-slate-800 bg-slate-950 py-12 px-6 mt-auto">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+          <div 
+            onClick={() => setView('home')}
+            className="flex items-center gap-2 cursor-pointer group"
+          >
+            <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center font-bold text-white group-hover:bg-blue-500 transition-colors">S</div>
+            <span className="text-xl font-bold text-white tracking-tight">SecureCheck <span className="text-blue-500">AI</span></span>
+          </div>
+          
+          <nav className="flex gap-8 text-sm text-slate-500">
+            <button onClick={() => setView('privacy')} className="hover:text-blue-500 transition-colors">Privacy Policy</button>
+            <button onClick={() => setView('terms')} className="hover:text-blue-500 transition-colors">Terms of Service</button>
+            <button onClick={() => setView('contact')} className="hover:text-blue-500 transition-colors">Contact Us</button>
+          </nav>
+
+          <div className="text-sm text-slate-600 text-center md:text-right">
+            &copy; 2026 SecureCheck AI. <br className="md:hidden" /> All rights reserved.
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
