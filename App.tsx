@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { HashRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
-import { FontGenerator } from './components/FontGenerator';
+import { FontGenerator } from './components/FontGenerator.tsx';
 
 /**
  * HOME COMPONENT
