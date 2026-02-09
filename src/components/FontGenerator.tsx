@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { fontStyles } from '../services/fontStyles';
 import { GeneratedResult } from '../types';
 
-const FontGenerator: React.FC = () => {
+export const FontGenerator: React.FC = () => {
   const [inputText, setInputText] = useState<string>('Hello Instagram!');
   const [results, setResults] = useState<GeneratedResult[]>([]);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
